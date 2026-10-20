@@ -261,7 +261,7 @@ Seluruh gambar di `docs/screenshots/` ditampilkan pada galeri berikut, diurutkan
 | 8 | <img src="docs/screenshots/08_favorit.png" alt="Favorit" width="240"> | `08_favorit.png` | Halaman tugas yang disimpan sebagai favorit. |
 | 9 | <img src="docs/screenshots/09_tugas_saya.png" alt="Tugas Saya" width="240"> | `09_tugas_saya.png` | Halaman Tugas Saya yang dibuka dari tombol tengah. |
 | 10 | <img src="docs/screenshots/10_profil.png" alt="Profil" width="240"> | `10_profil.png` | Halaman profil pengguna. |
-| 11 | <img src="docs/screenshots/placeholder.svg" alt="Placeholder screenshot" width="240"> | `placeholder.svg` | Placeholder screenshot aplikasi. |
+
 
 ## Menjalankan Aplikasi
 
