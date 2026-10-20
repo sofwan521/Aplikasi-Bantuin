@@ -247,23 +247,21 @@ Semua tombol placeholder memakai snackbar dengan pesan yang sama: `Fitur ini aka
 
 ## Screenshot
 
-Screenshot asli belum disertakan. Placeholder tersedia di [`docs/screenshots/placeholder.svg`](docs/screenshots/placeholder.svg).
+Seluruh gambar di `docs/screenshots/` ditampilkan pada galeri berikut, diurutkan berdasarkan nama file.
 
-![Placeholder screenshot Bantuin](docs/screenshots/placeholder.svg)
-
-Simpan tangkapan layar dengan nama berikut di `docs/screenshots/`:
-
-| Halaman | Nama file yang disarankan |
-| --- | --- |
-| Beranda | `beranda.png` |
-| Hasil pencarian/filter | `filter.png` |
-| Kategori | `kategori.png` |
-| Detail Tugas | `detail.png` |
-| Peta | `peta.png` |
-| Favorit | `favorit.png` |
-| Chat | `chat.png` |
-| Profil | `profil.png` |
-| Tugas Saya | `tugas_saya.png` |
+| No. | Galeri | Nama File | Keterangan |
+| ---: | --- | --- | --- |
+| 1 | <img src="docs/screenshots/01_beranda.png" alt="Beranda" width="240"> | `01_beranda.png` | Halaman Beranda dengan pencarian, rekomendasi, dan kategori. |
+| 2 | <img src="docs/screenshots/02_pencarian.png" alt="Pencarian tugas" width="240"> | `02_pencarian.png` | Hasil pencarian tugas pada Beranda. |
+| 3 | <img src="docs/screenshots/03_filter.png" alt="Filter tugas" width="240"> | `03_filter.png` | Bottom sheet filter kategori dan rentang tarif. |
+| 4 | <img src="docs/screenshots/04_kategori.png" alt="Kategori" width="240"> | `04_kategori.png` | Halaman daftar tugas berdasarkan kategori. |
+| 5 | <img src="docs/screenshots/05_detail.png" alt="Detail tugas" width="240"> | `05_detail.png` | Halaman detail tugas dengan tombol Ambil. |
+| 6 | <img src="docs/screenshots/06_detail_diambil.png" alt="Detail tugas setelah diambil" width="240"> | `06_detail_diambil.png` | Detail tugas setelah statusnya diambil. |
+| 7 | <img src="docs/screenshots/07_peta.png" alt="Peta" width="240"> | `07_peta.png` | Peta statis dengan sebaran avatar pemosting. |
+| 8 | <img src="docs/screenshots/08_favorit.png" alt="Favorit" width="240"> | `08_favorit.png` | Halaman tugas yang disimpan sebagai favorit. |
+| 9 | <img src="docs/screenshots/09_tugas_saya.png" alt="Tugas Saya" width="240"> | `09_tugas_saya.png` | Halaman Tugas Saya yang dibuka dari tombol tengah. |
+| 10 | <img src="docs/screenshots/10_profil.png" alt="Profil" width="240"> | `10_profil.png` | Halaman profil pengguna. |
+| 11 | <img src="docs/screenshots/placeholder.svg" alt="Placeholder screenshot" width="240"> | `placeholder.svg` | Placeholder screenshot aplikasi. |
 
 ## Menjalankan Aplikasi
 
