@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import '../models/task.dart';
+
 /// State bersama untuk favorit dan tugas yang telah diambil agen.
 class AppState extends ChangeNotifier {
   final Set<String> _favoriteTaskIds = <String>{};
@@ -30,6 +32,18 @@ class AppState extends ChangeNotifier {
     if (_takenTaskIds.add(taskId)) {
       notifyListeners();
     }
+  }
+
+  /// Memfilter [tasks] menjadi tugas yang telah diambil.
+  ///
+  /// Tugas berstatus diambil pada JSON dan tugas yang tercatat di state tetap
+  /// dihitung satu kali karena penyaringan dilakukan per objek tugas.
+  List<Task> takenTasksFrom(Iterable<Task> tasks) {
+    return tasks
+        .where(
+          (Task task) => task.status == TaskStatus.taken || isTaken(task.id),
+        )
+        .toList(growable: false);
   }
 }
 

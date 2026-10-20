@@ -20,6 +20,7 @@ Aplikasi "Bantuin" adalah marketplace tugas harian berbasis bantuan sesama. Peng
 - Definisi rute navigasi di `lib/routes/`.
 - Data JSON wajib ada di `assets/data/categories.json` dan `assets/data/tasks.json`.
 - Gambar aset di `assets/images/`.
+- Referensi desain: Aleksandr Volodkovich, "Find Assistants - Mobile App" (Dribbble, https://dribbble.com/shots/19553505-Find-Assistants-Mobile-App) dan berkas "Task App" (Figma Community, https://www.figma.com/community/file/1158702322980754042/task-app); dimodifikasi: teks Bahasa Indonesia, aksen kuning, dan mata uang Rupiah.
 - Path referensi desain: `design/ui_reference.png` dan `docs/soal_uts.pdf`.
 
 ## Stack

@@ -239,7 +239,7 @@ Fitur berikut sudah tampil di antarmuka, tetapi belum terhubung ke layanan nyata
 - **Lihat semua** pada bagian kategori di Beranda menampilkan snackbar.
 - Menu **Pengaturan** dan **Bantuan** di Profil menampilkan snackbar.
 - **Peta** adalah peta statis. Posisi avatar dihitung dari koordinat dummy, bukan dari GPS atau Google Maps. Aset `assets/images/map.png` belum tersedia, sehingga tampil fallback gambar jalan dari `CustomPaint`.
-- Statistik **Tugas diambil** di Profil masih bernilai statis; jumlah favorit mengikuti `AppState`.
+- Statistik **Tugas diambil** di Profil mengikuti data tugas dan `AppState`, sama dengan halaman Tugas Saya; jumlah favorit juga mengikuti `AppState`.
 - Favorit dan tugas yang diambil hanya tersimpan di memori dan kembali kosong saat aplikasi ditutup.
 - Belum ada autentikasi, backend, pembayaran, notifikasi, atau penyimpanan permanen.
 
@@ -284,7 +284,7 @@ flutter test      # Menjalankan widget test dasar
 
 ## Referensi Desain
 
-- **Sumber referensi:** **Task App, Figma Community (dimodifikasi)**.
+- Referensi desain: Aleksandr Volodkovich, "Find Assistants - Mobile App" (Dribbble, https://dribbble.com/shots/19553505-Find-Assistants-Mobile-App) dan berkas "Task App" (Figma Community, https://www.figma.com/community/file/1158702322980754042/task-app); dimodifikasi: teks Bahasa Indonesia, aksen kuning, dan mata uang Rupiah.
 - Referensi visual lokal: `design/ui_reference.png`.
 - Spesifikasi warna, tipografi, radius, shadow, spacing, dan komponen: `docs/DESIGN.md`.
 - Soal UTS: `docs/Soal UTS.pdf`.

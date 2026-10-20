@@ -65,7 +65,7 @@ class _MainShellState extends State<MainShell> {
           HomePage(repository: _repository),
           FavoritesPage(repository: _repository),
           const ChatPage(),
-          const ProfilePage(),
+          ProfilePage(repository: _repository),
         ],
       ),
       bottomNavigationBar: _MainBottomNavigationBar(

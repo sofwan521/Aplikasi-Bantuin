@@ -72,13 +72,9 @@ class _MyTasksPageState extends State<MyTasksPage> {
             return _ErrorState(onRetry: _reload);
           }
 
-          final List<Task> takenTasks = (snapshot.data ?? const <Task>[])
-              .where(
-                (Task task) =>
-                    task.status == TaskStatus.taken ||
-                    appState.isTaken(task.id),
-              )
-              .toList(growable: false);
+          final List<Task> takenTasks = appState.takenTasksFrom(
+            snapshot.data ?? const <Task>[],
+          );
 
           if (takenTasks.isEmpty) {
             return const _EmptyState();

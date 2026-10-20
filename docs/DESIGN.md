@@ -1,6 +1,8 @@
 # DESIGN.md
 
-Referensi desain: `design/ui_reference.png`
+Referensi desain: Aleksandr Volodkovich, "Find Assistants - Mobile App" (Dribbble, https://dribbble.com/shots/19553505-Find-Assistants-Mobile-App) dan berkas "Task App" (Figma Community, https://www.figma.com/community/file/1158702322980754042/task-app); dimodifikasi: teks Bahasa Indonesia, aksen kuning, dan mata uang Rupiah.
+
+Berkas referensi lokal: `design/ui_reference.png`
 
 ## Daftar Layar
 1. **Beranda** — daftar tugas rekomendasi (kartu tugas), search bar dengan tombol filter, dan daftar kategori.

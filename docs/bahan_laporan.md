@@ -515,6 +515,8 @@ final List<Task> takenTasks = (snapshot.data ?? const <Task>[])
 
 Karena seluruh data dummy saat ini berstatus `tersedia`, halaman Tugas Saya kosong pada saat aplikasi pertama dibuka. Halaman tersebut terisi setelah pengguna menekan **Ambil** pada salah satu tugas. Empty state yang ditampilkan adalah `Belum ada tugas yang diambil`.
 
+Helper `takenTasksFrom` yang sama juga dipakai halaman Profil untuk menghitung statistik **Tugas diambil**. Karena Profil membaca `AppStateScope`, angka tersebut langsung berubah ketika pengguna menekan **Ambil**.
+
 ### 4.10 Screenshot Implementasi
 
 **[SCREENSHOT: `docs/screenshots/beranda.png` — Halaman Beranda menampilkan pencarian, rekomendasi, dan kategori]**
@@ -592,7 +594,7 @@ Karena seluruh data dummy saat ini berstatus `tersedia`, halaman Tugas Saya koso
 | Bantuan | Menu Bantuan pada Profil menampilkan snackbar. | Menyediakan pusat bantuan, FAQ, dan kanal kontak. |
 | Lihat semua kategori | Tautan pada bagian kategori menampilkan snackbar. | Membuat halaman daftar seluruh kategori atau halaman eksplorasi. |
 | Peta | Peta statis dengan avatar berdasarkan koordinat dummy; tidak menggunakan GPS. | Mengintegrasikan peta interaktif, geolokasi, dan pembaruan posisi secara *real-time*. |
-| Statistik profil | Jumlah favorit mengikuti `AppState`; statistik tugas diambil masih statis. | Menghitung statistik dari data tugas dan menyinkronkannya dengan API. |
+| Statistik profil | Jumlah favorit dan tugas diambil mengikuti `AppState`; tugas diambil memakai helper yang sama dengan halaman Tugas Saya. | Menyinkronkan statistik dengan API pada tahap berikutnya. |
 | Penyimpanan | Favorit dan tugas yang diambil hanya tersimpan di memori. | Menambahkan penyimpanan lokal permanen atau sinkronisasi dengan backend. |
 
 Semua tombol placeholder memakai snackbar dengan pesan yang sama, yaitu `Fitur ini akan tersedia pada pengembangan berikutnya`.
@@ -616,9 +618,8 @@ Aplikasi telah dilengkapi beberapa penyesuaian responsif dan penanganan state:
 2. Favorit dan tugas yang diambil belum disimpan ke penyimpanan permanen.
 3. Peta belum interaktif dan belum menggunakan layanan peta.
 4. Chat, bagikan, pengaturan, bantuan, dan tautan lihat semua kategori belum berfungsi penuh.
-5. Statistik tugas diambil pada Profil belum terhubung ke `AppState`.
-6. Belum ada autentikasi, pembayaran, notifikasi push, dan validasi pengguna secara nyata.
-7. Pengujian otomatis masih terbatas pada widget test dasar.
+5. Belum ada autentikasi, pembayaran, notifikasi push, dan validasi pengguna secara nyata.
+6. Pengujian otomatis masih terbatas pada widget test dasar.
 
 ---
 

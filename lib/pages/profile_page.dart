@@ -1,11 +1,31 @@
 import 'package:flutter/material.dart';
 
+import '../models/task.dart';
 import '../services/app_state.dart';
+import '../services/task_repository.dart';
 import '../theme/app_theme.dart';
 
 /// Halaman profil pengguna dengan ringkasan aktivitas.
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key, this.repository});
+
+  /// Repository opsional agar mudah diganti saat memakai API atau diuji.
+  final TaskRepository? repository;
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  late final TaskRepository _repository;
+  late Future<List<Task>> _tasksFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _repository = widget.repository ?? LocalJsonRepository();
+    _tasksFuture = _repository.getTasks();
+  }
 
   void _showComingSoon(BuildContext context) {
     ScaffoldMessenger.of(context)
@@ -83,10 +103,22 @@ class ProfilePage extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _ProfileStat(
-                  icon: Icons.task_alt,
-                  label: 'Tugas diambil',
-                  value: '0',
+                child: FutureBuilder<List<Task>>(
+                  future: _tasksFuture,
+                  builder:
+                      (
+                        BuildContext context,
+                        AsyncSnapshot<List<Task>> snapshot,
+                      ) {
+                        final int takenCount = appState
+                            .takenTasksFrom(snapshot.data ?? const <Task>[])
+                            .length;
+                        return _ProfileStat(
+                          icon: Icons.task_alt,
+                          label: 'Tugas diambil',
+                          value: '$takenCount',
+                        );
+                      },
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
