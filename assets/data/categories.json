@@ -2,37 +2,31 @@
   {
     "id": "pindah-rumah",
     "nama": "Pindah Rumah",
-    "ikon": "local_shipping",
-    "jumlah_tawaran": 24
+    "ikon": "local_shipping"
   },
   {
     "id": "bantu-rumah",
     "nama": "Membantu Sekitar Rumah",
-    "ikon": "home_repair_service",
-    "jumlah_tawaran": 38
+    "ikon": "home_repair_service"
   },
   {
     "id": "hewan-peliharaan",
     "nama": "Hewan Peliharaan",
-    "ikon": "pets",
-    "jumlah_tawaran": 19
+    "ikon": "pets"
   },
   {
     "id": "belanja-antar",
     "nama": "Belanja dan Antar",
-    "ikon": "shopping_bag",
-    "jumlah_tawaran": 27
+    "ikon": "shopping_bag"
   },
   {
     "id": "kebersihan",
     "nama": "Kebersihan",
-    "ikon": "cleaning_services",
-    "jumlah_tawaran": 22
+    "ikon": "cleaning_services"
   },
   {
     "id": "bantuan-belajar",
     "nama": "Bantuan Belajar",
-    "ikon": "menu_book",
-    "jumlah_tawaran": 15
+    "ikon": "menu_book"
   }
 ]

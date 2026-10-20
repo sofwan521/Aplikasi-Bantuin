@@ -9,6 +9,9 @@ import '../widgets/category_tile.dart';
 import '../widgets/filter_button.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/task_card.dart';
+import 'category_page.dart';
+import 'detail_page.dart';
+import 'map_page.dart';
 
 /// Halaman beranda aplikasi Bantuin.
 ///
@@ -46,7 +49,13 @@ class _HomePageState extends State<HomePage> {
   Future<_HomeData> _loadData() async {
     final List<Category> categories = await _repository.getCategories();
     final List<Task> tasks = await _repository.getTasks();
-    return _HomeData(categories: categories, tasks: tasks);
+    final Map<String, int> taskCounts = await _repository
+        .countTasksByCategory();
+    return _HomeData(
+      categories: categories,
+      tasks: tasks,
+      taskCounts: taskCounts,
+    );
   }
 
   void _reload() {
@@ -158,7 +167,14 @@ class _HomePageState extends State<HomePage> {
             child: _SectionHeader(
               title: 'Direkomendasikan Untukmu',
               actionLabel: 'Lihat di peta',
-              onAction: () => _showComingSoon('Peta tugas segera hadir.'),
+              onAction: () {
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(
+                    builder: (BuildContext context) =>
+                        MapPage(repository: _repository),
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -211,8 +227,16 @@ class _HomePageState extends State<HomePage> {
                     child: TaskCard.fromTask(
                       task,
                       isFavorite: _favoriteTaskIds.contains(task.id),
-                      onTap: () =>
-                          _showComingSoon('Detail tugas segera hadir.'),
+                      onTap: () {
+                        Navigator.of(context).push<void>(
+                          MaterialPageRoute<void>(
+                            builder: (BuildContext context) => DetailPage(
+                              task: task,
+                              isFavorite: _favoriteTaskIds.contains(task.id),
+                            ),
+                          ),
+                        );
+                      },
                       onFavoriteTap: () => _toggleFavorite(task.id),
                       onChatTap: () =>
                           _showComingSoon('Chat pemosting segera hadir.'),
@@ -238,9 +262,17 @@ class _HomePageState extends State<HomePage> {
                 for (final Category category in data.categories) ...[
                   CategoryTile.fromCategory(
                     category,
-                    onTap: () => _showComingSoon(
-                      'Kategori ${category.name} segera hadir.',
-                    ),
+                    taskCount: data.taskCounts[category.id] ?? 0,
+                    onTap: () {
+                      Navigator.of(context).push<void>(
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext context) => CategoryPage(
+                            category: category,
+                            repository: _repository,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: AppSpacing.xs),
                 ],
@@ -372,8 +404,13 @@ class _ErrorState extends StatelessWidget {
 
 /// Gabungan data yang dibutuhkan beranda.
 class _HomeData {
-  const _HomeData({required this.categories, required this.tasks});
+  const _HomeData({
+    required this.categories,
+    required this.tasks,
+    required this.taskCounts,
+  });
 
   final List<Category> categories;
   final List<Task> tasks;
+  final Map<String, int> taskCounts;
 }

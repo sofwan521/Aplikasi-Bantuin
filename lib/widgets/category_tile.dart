@@ -37,13 +37,14 @@ class CategoryTile extends StatelessWidget {
   factory CategoryTile.fromCategory(
     Category category, {
     Key? key,
+    required int taskCount,
     VoidCallback? onTap,
   }) {
     return CategoryTile(
       key: key,
       icon: categoryIconFromName(category.iconName),
       label: category.name,
-      taskCount: category.offerCount,
+      taskCount: taskCount,
       onTap: onTap,
     );
   }

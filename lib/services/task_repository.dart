@@ -21,6 +21,9 @@ abstract class TaskRepository {
 
   /// Mengambil satu tugas berdasarkan ID, atau null bila tidak ditemukan.
   Future<Task?> getTaskById(String id);
+
+  /// Menghitung jumlah tugas untuk setiap ID kategori.
+  Future<Map<String, int>> countTasksByCategory();
 }
 
 /// Implementasi [TaskRepository] yang membaca data dari aset JSON lokal.
@@ -66,6 +69,22 @@ class LocalJsonRepository implements TaskRepository {
     return null;
   }
 
+  @override
+  Future<Map<String, int>> countTasksByCategory() async {
+    final List<Task> tasks = await getTasks();
+    final Map<String, int> counts = <String, int>{};
+
+    for (final Task task in tasks) {
+      counts.update(
+        task.categoryId,
+        (int value) => value + 1,
+        ifAbsent: () => 1,
+      );
+    }
+
+    return Map<String, int>.unmodifiable(counts);
+  }
+
   /// Memuat kategori dari aset JSON lokal.
   ///
   /// CATATAN API: Saat backend tersedia, ganti pembacaan rootBundle di bawah
@@ -76,10 +95,7 @@ class LocalJsonRepository implements TaskRepository {
     final List<dynamic> data = jsonDecode(raw) as List<dynamic>;
 
     return data
-        .map(
-          (dynamic item) =>
-              Category.fromJson(item as Map<String, dynamic>),
-        )
+        .map((dynamic item) => Category.fromJson(item as Map<String, dynamic>))
         .toList(growable: false);
   }
 
@@ -93,9 +109,7 @@ class LocalJsonRepository implements TaskRepository {
     final List<dynamic> data = jsonDecode(raw) as List<dynamic>;
 
     return data
-        .map(
-          (dynamic item) => Task.fromJson(item as Map<String, dynamic>),
-        )
+        .map((dynamic item) => Task.fromJson(item as Map<String, dynamic>))
         .toList(growable: false);
   }
 }
