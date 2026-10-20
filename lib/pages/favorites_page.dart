@@ -66,11 +66,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
             return _ErrorState(onRetry: _reload);
           }
 
-          final List<Task> allTasks = <Task>[
-            ...appState.localTasks,
-            ...(snapshot.data ?? const <Task>[]),
-          ];
-          final List<Task> favorites = allTasks
+          final List<Task> favorites = (snapshot.data ?? const <Task>[])
               .where((Task task) => favoriteIds.contains(task.id))
               .toList(growable: false);
 

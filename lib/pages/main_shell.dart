@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../services/app_state.dart';
 import '../services/task_repository.dart';
 import '../theme/app_theme.dart';
-import '../widgets/add_task_sheet.dart';
 import 'chat_page.dart';
 import 'favorites_page.dart';
 import 'home_page.dart';
+import 'my_tasks_page.dart';
 import 'profile_page.dart';
 
 /// Kerangka utama aplikasi dengan navigasi bawah lima item.
@@ -30,7 +29,7 @@ class _MainShellState extends State<MainShell> {
     _repository = widget.repository ?? LocalJsonRepository();
   }
 
-  /// Indeks halaman pada [IndexedStack] tanpa tombol tambah.
+  /// Indeks halaman pada [IndexedStack] tanpa tombol Tugas Saya.
   int get _pageIndex {
     if (_navIndex <= 1) {
       return _navIndex;
@@ -40,7 +39,7 @@ class _MainShellState extends State<MainShell> {
 
   void _onNavTap(int index) {
     if (index == 2) {
-      _openAddTask();
+      _openMyTasks();
       return;
     }
 
@@ -49,15 +48,12 @@ class _MainShellState extends State<MainShell> {
     });
   }
 
-  Future<void> _openAddTask() async {
-    final AppState appState = AppStateScope.read(context);
-    final bool added = await showAddTaskSheet(context, appState);
-
-    if (added && mounted) {
-      setState(() {
-        _navIndex = 0;
-      });
-    }
+  void _openMyTasks() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => MyTasksPage(repository: _repository),
+      ),
+    );
   }
 
   @override
@@ -80,7 +76,7 @@ class _MainShellState extends State<MainShell> {
   }
 }
 
-/// Navigasi bawah dengan tombol tambah kuning yang menonjol di tengah.
+/// Navigasi bawah dengan tombol Tugas Saya kuning yang menonjol di tengah.
 class _MainBottomNavigationBar extends StatelessWidget {
   const _MainBottomNavigationBar({
     required this.currentIndex,
@@ -147,7 +143,7 @@ class _MainBottomNavigationBar extends StatelessWidget {
               right: 0,
               child: Center(
                 child: Tooltip(
-                  message: 'Tambah Tugas',
+                  message: 'Tugas Saya',
                   child: Material(
                     color: AppColors.accent,
                     shape: const CircleBorder(),
@@ -160,7 +156,7 @@ class _MainBottomNavigationBar extends StatelessWidget {
                         width: 56,
                         height: 56,
                         child: Icon(
-                          Icons.add,
+                          Icons.checklist_rounded,
                           size: 30,
                           color: AppColors.textPrimary,
                         ),

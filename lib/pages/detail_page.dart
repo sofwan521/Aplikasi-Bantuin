@@ -8,6 +8,9 @@ import '../widgets/app_image.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/verified_avatar_chip.dart';
 
+const String _comingSoonMessage =
+    'Fitur ini akan tersedia pada pengembangan berikutnya';
+
 /// Halaman detail tugas dengan foto header dan aksi mengambil tugas.
 class DetailPage extends StatefulWidget {
   const DetailPage({super.key, required this.task});
@@ -20,16 +23,6 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
-  late bool _isTaken;
-  late bool _isCompleted;
-
-  @override
-  void initState() {
-    super.initState();
-    _isTaken = widget.task.status == TaskStatus.taken;
-    _isCompleted = widget.task.status == TaskStatus.completed;
-  }
-
   void _showMessage(String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -65,15 +58,17 @@ class _DetailPageState extends State<DetailPage> {
       return;
     }
 
-    setState(() {
-      _isTaken = true;
-    });
+    AppStateScope.read(context).takeTask(widget.task.id);
     _showMessage('Tugas berhasil diambil');
   }
 
   @override
   Widget build(BuildContext context) {
     final AppState appState = AppStateScope.of(context);
+    final bool isTaken =
+        widget.task.status == TaskStatus.taken ||
+        appState.isTaken(widget.task.id);
+    final bool isCompleted = widget.task.status == TaskStatus.completed;
     final double photoHeight = (MediaQuery.sizeOf(context).height * 0.38)
         .clamp(260.0, 360.0)
         .toDouble();
@@ -93,8 +88,7 @@ class _DetailPageState extends State<DetailPage> {
                       task: widget.task,
                       height: photoHeight,
                       onBack: () => Navigator.of(context).maybePop(),
-                      onShare: () =>
-                          _showMessage('Fitur bagikan segera hadir.'),
+                      onShare: () => _showMessage(_comingSoonMessage),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(AppSpacing.screen),
@@ -110,9 +104,9 @@ class _DetailPageState extends State<DetailPage> {
               ),
             ),
             _BottomActionBar(
-              isTaken: _isTaken,
-              isCompleted: _isCompleted,
-              onChatTap: () => _showMessage('Chat pemosting segera hadir.'),
+              isTaken: isTaken,
+              isCompleted: isCompleted,
+              onChatTap: () => _showMessage(_comingSoonMessage),
               onTakeTap: _confirmTakeTask,
             ),
           ],

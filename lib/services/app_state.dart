@@ -1,20 +1,15 @@
 import 'package:flutter/widgets.dart';
 
-import '../models/task.dart';
-
-/// State bersama untuk favorit dan tugas yang ditambahkan pengguna.
+/// State bersama untuk favorit dan tugas yang telah diambil agen.
 class AppState extends ChangeNotifier {
   final Set<String> _favoriteTaskIds = <String>{};
-  final List<Task> _localTasks = <Task>[];
+  final Set<String> _takenTaskIds = <String>{};
 
   /// Kumpulan ID tugas yang difavoritkan.
   Set<String> get favoriteTaskIds => Set<String>.unmodifiable(_favoriteTaskIds);
 
   /// Jumlah tugas yang difavoritkan.
   int get favoriteCount => _favoriteTaskIds.length;
-
-  /// Daftar tugas yang ditambahkan secara lokal dari form.
-  List<Task> get localTasks => List<Task>.unmodifiable(_localTasks);
 
   /// Mengecek apakah sebuah tugas sudah difavoritkan.
   bool isFavorite(String taskId) => _favoriteTaskIds.contains(taskId);
@@ -27,10 +22,14 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Menambahkan tugas baru ke daftar lokal.
-  void addTask(Task task) {
-    _localTasks.insert(0, task);
-    notifyListeners();
+  /// Mengecek apakah tugas sudah diambil oleh agen.
+  bool isTaken(String taskId) => _takenTaskIds.contains(taskId);
+
+  /// Mencatat tugas yang telah diambil agar tampil di halaman Tugas Saya.
+  void takeTask(String taskId) {
+    if (_takenTaskIds.add(taskId)) {
+      notifyListeners();
+    }
   }
 }
 

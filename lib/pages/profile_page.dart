@@ -7,10 +7,14 @@ import '../theme/app_theme.dart';
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
-  void _showComingSoon(BuildContext context, String message) {
+  void _showComingSoon(BuildContext context) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+      ..showSnackBar(
+        const SnackBar(
+          content: Text('Fitur ini akan tersedia pada pengembangan berikutnya'),
+        ),
+      );
   }
 
   @override
@@ -109,31 +113,17 @@ class ProfilePage extends StatelessWidget {
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.assignment_outlined),
-                  title: const Text('Tugas Saya'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _showComingSoon(
-                    context,
-                    'Halaman tugas saya segera hadir.',
-                  ),
-                ),
-                const Divider(),
-                ListTile(
                   leading: const Icon(Icons.settings_outlined),
                   title: const Text('Pengaturan'),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _showComingSoon(
-                    context,
-                    'Halaman pengaturan segera hadir.',
-                  ),
+                  onTap: () => _showComingSoon(context),
                 ),
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.help_outline),
                   title: const Text('Bantuan'),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () =>
-                      _showComingSoon(context, 'Halaman bantuan segera hadir.'),
+                  onTap: () => _showComingSoon(context),
                 ),
               ],
             ),

@@ -87,7 +87,7 @@
     "verified": false,
     "foto_url": "https://loremflickr.com/600/400/package",
     "foto_pemosting_url": "https://i.pravatar.cc/150?img=15",
-    "status": "diambil"
+    "status": "tersedia"
   },
   {
     "id": "tugas-006",
@@ -195,7 +195,7 @@
     "verified": false,
     "foto_url": "https://loremflickr.com/600/400/carwash",
     "foto_pemosting_url": "https://i.pravatar.cc/150?img=53",
-    "status": "selesai"
+    "status": "tersedia"
   },
   {
     "id": "tugas-012",

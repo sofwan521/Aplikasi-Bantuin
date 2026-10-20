@@ -11,10 +11,12 @@ import '../widgets/category_tile.dart';
 import '../widgets/filter_button.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/task_card.dart';
+import '../widgets/task_list_card.dart';
 
 /// Halaman beranda aplikasi Bantuin.
 ///
-/// Menampilkan pencarian, tugas rekomendasi, dan daftar kategori.
+/// Menampilkan pencarian, tugas rekomendasi, dan daftar kategori. Pencarian
+/// dan filter bekerja pada seluruh tugas, bukan hanya empat rekomendasi.
 class HomePage extends StatefulWidget {
   const HomePage({super.key, this.repository});
 
@@ -30,6 +32,7 @@ class _HomePageState extends State<HomePage> {
   late Future<_HomeData> _dataFuture;
   final TextEditingController _searchController = TextEditingController();
   String _query = '';
+  _TaskFilter _filter = const _TaskFilter();
 
   @override
   void initState() {
@@ -62,27 +65,80 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  /// Memfilter tugas secara lokal berdasarkan kata kunci pencarian.
+  /// Memfilter seluruh tugas berdasarkan kata kunci dan filter aktif.
   List<Task> _filterTasks(List<Task> tasks) {
     final String query = _query.trim().toLowerCase();
-    if (query.isEmpty) {
-      return tasks;
-    }
+    final RangeValues? rateRange = _filter.rateRange;
 
     return tasks
         .where((Task task) {
-          return task.title.toLowerCase().contains(query) ||
+          final bool matchesQuery =
+              query.isEmpty ||
+              task.title.toLowerCase().contains(query) ||
               task.description.toLowerCase().contains(query) ||
-              task.location.toLowerCase().contains(query) ||
-              task.posterName.toLowerCase().contains(query);
+              task.location.toLowerCase().contains(query);
+          final bool matchesCategory =
+              _filter.categoryId == null ||
+              task.categoryId == _filter.categoryId;
+          final bool matchesRate =
+              rateRange == null ||
+              (task.rate >= rateRange.start && task.rate <= rateRange.end);
+          return matchesQuery && matchesCategory && matchesRate;
         })
         .toList(growable: false);
   }
 
-  void _showComingSoon(String message) {
+  bool get _isSearchOrFilterActive =>
+      _query.trim().isNotEmpty || _filter.isActive;
+
+  /// Membuka bottom sheet filter kategori dan rentang tarif.
+  Future<void> _openFilterSheet() async {
+    FocusScope.of(context).unfocus();
+
+    late final _HomeData data;
+    try {
+      data = await _dataFuture;
+    } catch (_) {
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    final _TaskFilter? filter = await showModalBottomSheet<_TaskFilter>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (BuildContext context) {
+        return _FilterSheet(
+          categories: data.categories,
+          tasks: data.tasks,
+          initialFilter: _filter,
+        );
+      },
+    );
+
+    if (!mounted || filter == null) {
+      return;
+    }
+
+    setState(() {
+      _filter = filter;
+    });
+  }
+
+  void _showComingSoon() {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+      ..showSnackBar(
+        const SnackBar(
+          content: Text('Fitur ini akan tersedia pada pengembangan berikutnya'),
+        ),
+      );
   }
 
   @override
@@ -109,9 +165,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
-                  FilterButton(
-                    onTap: () => _showComingSoon('Filter tugas segera hadir.'),
-                  ),
+                  FilterButton(onTap: _openFilterSheet),
                 ],
               ),
             ),
@@ -137,19 +191,17 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildContent(BuildContext context, _HomeData data) {
-    final AppState appState = AppStateScope.of(context);
-    final List<Task> allTasks = <Task>[...appState.localTasks, ...data.tasks];
-    final Map<String, int> taskCounts = Map<String, int>.of(data.taskCounts);
-    for (final Task task in appState.localTasks) {
-      taskCounts.update(
-        task.categoryId,
-        (int value) => value + 1,
-        ifAbsent: () => 1,
-      );
+    final List<Task> filteredTasks = _filterTasks(data.tasks);
+    if (_isSearchOrFilterActive) {
+      return _SearchResults(tasks: filteredTasks);
     }
-    final List<Task> tasks = _filterTasks(allTasks)
-        .take(4)
-        .toList(growable: false);
+
+    return _buildHomeSections(context, data);
+  }
+
+  Widget _buildHomeSections(BuildContext context, _HomeData data) {
+    final AppState appState = AppStateScope.of(context);
+    final List<Task> recommended = data.tasks.take(4).toList(growable: false);
     final Size screenSize = MediaQuery.sizeOf(context);
     final double cardWidth = (screenSize.width * 0.78)
         .clamp(240.0, 320.0)
@@ -177,7 +229,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          if (tasks.isEmpty)
+          if (recommended.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.screen,
@@ -216,11 +268,11 @@ class _HomePageState extends State<HomePage> {
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.screen,
                 ),
-                itemCount: tasks.length,
+                itemCount: recommended.length,
                 separatorBuilder: (_, _) =>
                     const SizedBox(width: AppSpacing.sm),
                 itemBuilder: (BuildContext context, int index) {
-                  final Task task = tasks[index];
+                  final Task task = recommended[index];
                   return SizedBox(
                     width: cardWidth,
                     child: TaskCard.fromTask(
@@ -231,8 +283,7 @@ class _HomePageState extends State<HomePage> {
                             .pushNamed(AppRoutes.detail, arguments: task);
                       },
                       onFavoriteTap: () => appState.toggleFavorite(task.id),
-                      onChatTap: () =>
-                          _showComingSoon('Chat pemosting segera hadir.'),
+                      onChatTap: _showComingSoon,
                     ),
                   );
                 },
@@ -244,7 +295,7 @@ class _HomePageState extends State<HomePage> {
             child: _SectionHeader(
               title: 'Kategori',
               actionLabel: 'Lihat semua',
-              onAction: () => _showComingSoon('Halaman kategori segera hadir.'),
+              onAction: _showComingSoon,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -270,7 +321,7 @@ class _HomePageState extends State<HomePage> {
                       for (final Category category in data.categories) ...[
                         CategoryTile.fromCategory(
                           category,
-                          taskCount: taskCounts[category.id] ?? 0,
+                          taskCount: data.taskCounts[category.id] ?? 0,
                           onTap: () {
                             Navigator.of(context).pushNamed(
                               AppRoutes.category,
@@ -286,6 +337,270 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: AppSpacing.md),
         ],
       ),
+    );
+  }
+}
+
+/// Daftar hasil pencarian dan filter dalam bentuk kartu vertikal.
+class _SearchResults extends StatelessWidget {
+  const _SearchResults({required this.tasks});
+
+  final List<Task> tasks;
+
+  @override
+  Widget build(BuildContext context) {
+    final AppState appState = AppStateScope.of(context);
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final bool isEmpty = tasks.isEmpty;
+
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.screen,
+        AppSpacing.md,
+        AppSpacing.screen,
+        AppSpacing.md,
+      ),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      itemCount: isEmpty ? 2 : tasks.length + 1,
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (BuildContext context, int index) {
+        if (index == 0) {
+          return Text('${tasks.length} hasil', style: textTheme.titleMedium);
+        }
+
+        if (isEmpty) {
+          return const _EmptySearchResult();
+        }
+
+        final Task task = tasks[index - 1];
+        return TaskListCard(
+          task: task,
+          isFavorite: appState.isFavorite(task.id),
+          onTap: () {
+            Navigator.of(context).pushNamed(AppRoutes.detail, arguments: task);
+          },
+          onFavoriteTap: () => appState.toggleFavorite(task.id),
+        );
+      },
+    );
+  }
+}
+
+/// Empty state saat pencarian atau filter tidak menemukan tugas.
+class _EmptySearchResult extends StatelessWidget {
+  const _EmptySearchResult();
+
+  @override
+  Widget build(BuildContext context) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        boxShadow: AppShadows.card,
+      ),
+      child: Column(
+        children: [
+          const Icon(
+            Icons.search_off,
+            size: 32,
+            color: AppColors.textSecondary,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'Tugas tidak ditemukan',
+            textAlign: TextAlign.center,
+            style: textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Filter aktif yang dipilih pengguna pada beranda.
+class _TaskFilter {
+  const _TaskFilter({this.categoryId, this.rateRange});
+
+  final String? categoryId;
+  final RangeValues? rateRange;
+
+  bool get isActive => categoryId != null || rateRange != null;
+}
+
+/// Bottom sheet untuk memilih kategori dan rentang tarif.
+class _FilterSheet extends StatefulWidget {
+  const _FilterSheet({
+    required this.categories,
+    required this.tasks,
+    required this.initialFilter,
+  });
+
+  final List<Category> categories;
+  final List<Task> tasks;
+  final _TaskFilter initialFilter;
+
+  @override
+  State<_FilterSheet> createState() => _FilterSheetState();
+}
+
+class _FilterSheetState extends State<_FilterSheet> {
+  late double _minRate;
+  late double _maxRate;
+  late RangeValues _rateRange;
+  String? _categoryId;
+
+  @override
+  void initState() {
+    super.initState();
+    final List<int> rates = widget.tasks.map((Task task) => task.rate).toList()
+      ..sort();
+    final double minRate = rates.isEmpty ? 0 : rates.first.toDouble();
+    final double maxRate = rates.isEmpty ? 1 : rates.last.toDouble();
+
+    _minRate = minRate;
+    _maxRate = maxRate <= minRate ? minRate + 1 : maxRate;
+    _categoryId = widget.initialFilter.categoryId;
+
+    final RangeValues? initialRange = widget.initialFilter.rateRange;
+    if (initialRange == null) {
+      _rateRange = RangeValues(_minRate, _maxRate);
+    } else {
+      final double start = initialRange.start
+          .clamp(_minRate, _maxRate)
+          .toDouble();
+      final double end = initialRange.end.clamp(_minRate, _maxRate).toDouble();
+      _rateRange = start <= end
+          ? RangeValues(start, end)
+          : RangeValues(_minRate, _maxRate);
+    }
+  }
+
+  void _reset() {
+    Navigator.of(context).pop(const _TaskFilter());
+  }
+
+  void _apply() {
+    Navigator.of(context)
+        .pop(_TaskFilter(categoryId: _categoryId, rateRange: _rateRange));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
+
+    return SafeArea(
+      top: false,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.screen),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Filter Tugas', style: textTheme.titleLarge),
+            const SizedBox(height: AppSpacing.md),
+            Text('Kategori', style: textTheme.titleMedium),
+            const SizedBox(height: AppSpacing.xs),
+            Wrap(
+              spacing: AppSpacing.xs,
+              runSpacing: AppSpacing.xs,
+              children: [
+                _categoryChip(
+                  label: 'Semua',
+                  selected: _categoryId == null,
+                  onSelected: () => setState(() => _categoryId = null),
+                ),
+                for (final Category category in widget.categories)
+                  _categoryChip(
+                    label: category.name,
+                    selected: _categoryId == category.id,
+                    onSelected: () {
+                      setState(() {
+                        _categoryId = _categoryId == category.id
+                            ? null
+                            : category.id;
+                      });
+                    },
+                  ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              children: [
+                Expanded(child: Text('Tarif', style: textTheme.titleMedium)),
+                Text(
+                  '${formatRupiah(_rateRange.start.round())} - '
+                  '${formatRupiah(_rateRange.end.round())}',
+                  style: textTheme.bodySmall,
+                ),
+              ],
+            ),
+            RangeSlider(
+              values: _rateRange,
+              min: _minRate,
+              max: _maxRate,
+              divisions: 20,
+              labels: RangeLabels(
+                formatRupiah(_rateRange.start.round()),
+                formatRupiah(_rateRange.end.round()),
+              ),
+              activeColor: AppColors.accent,
+              inactiveColor: AppColors.divider,
+              onChanged: (RangeValues values) {
+                setState(() => _rateRange = values);
+              },
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: AppSpacing.primaryButtonHeight,
+                    child: OutlinedButton(
+                      onPressed: _reset,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.textPrimary,
+                        side: const BorderSide(color: AppColors.divider),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.button),
+                        ),
+                      ),
+                      child: const Text('Reset'),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: PrimaryButton(label: 'Terapkan', onPressed: _apply),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _categoryChip({
+    required String label,
+    required bool selected,
+    required VoidCallback onSelected,
+  }) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onSelected(),
+      selectedColor: AppColors.accent,
+      backgroundColor: AppColors.surface,
+      side: const BorderSide(color: AppColors.divider),
+      checkmarkColor: AppColors.textPrimary,
+      labelStyle: Theme.of(context).textTheme.bodySmall
+          ?.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
     );
   }
 }

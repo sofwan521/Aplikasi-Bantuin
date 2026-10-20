@@ -92,9 +92,9 @@ class ChatPage extends StatelessWidget {
                       ScaffoldMessenger.of(context)
                         ..hideCurrentSnackBar()
                         ..showSnackBar(
-                          SnackBar(
+                          const SnackBar(
                             content: Text(
-                              'Chat dengan ${thread.name} segera hadir.',
+                              'Fitur ini akan tersedia pada pengembangan berikutnya',
                             ),
                           ),
                         );

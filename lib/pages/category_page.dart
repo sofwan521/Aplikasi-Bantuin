@@ -47,9 +47,6 @@ class _CategoryPageState extends State<CategoryPage> {
   @override
   Widget build(BuildContext context) {
     final AppState appState = AppStateScope.of(context);
-    final List<Task> localTasks = appState.localTasks
-        .where((Task task) => task.categoryId == widget.category.id)
-        .toList(growable: false);
 
     return Scaffold(
       appBar: AppBar(
@@ -87,10 +84,7 @@ class _CategoryPageState extends State<CategoryPage> {
             return _ErrorState(onRetry: _reload);
           }
 
-          final List<Task> tasks = <Task>[
-            ...localTasks,
-            ...(snapshot.data ?? const <Task>[]),
-          ];
+          final List<Task> tasks = snapshot.data ?? const <Task>[];
           if (tasks.isEmpty) {
             return const _EmptyState();
           }

@@ -7,6 +7,7 @@ import '../pages/chat_page.dart';
 import '../pages/detail_page.dart';
 import '../pages/favorites_page.dart';
 import '../pages/map_page.dart';
+import '../pages/my_tasks_page.dart';
 import '../pages/profile_page.dart';
 
 /// Kumpulan nama dan definisi rute navigasi aplikasi.
@@ -19,12 +20,14 @@ class AppRoutes {
   static const String favorites = '/favorit';
   static const String chat = '/chat';
   static const String profile = '/profil';
+  static const String myTasks = '/tugas-saya';
 
   /// Rute tanpa argumen yang bisa didaftarkan langsung ke [MaterialApp].
   static Map<String, WidgetBuilder> get routes => <String, WidgetBuilder>{
     favorites: (_) => const FavoritesPage(),
     chat: (_) => const ChatPage(),
     profile: (_) => const ProfilePage(),
+    myTasks: (_) => const MyTasksPage(),
   };
 
   /// Membuat rute yang membutuhkan argumen model.

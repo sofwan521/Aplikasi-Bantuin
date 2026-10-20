@@ -1,14 +1,14 @@
 # AGENTS.md
 
 ## Ringkasan Tugas
-Aplikasi "Bantuin" adalah marketplace tugas harian berbasis bantuan sesama. Pengguna melihat tugas di sekitarnya (jalan-jalan anjing, pindah rumah, bantu pekerjaan rumah, dll), lalu menekan "Ambil" untuk mengerjakan dan mendapat imbalan dalam Rupiah. Tugas UTS Mobile Programming, UI mengikuti design/ui_reference.png.
+Aplikasi "Bantuin" adalah marketplace tugas harian berbasis bantuan sesama. Pengguna melihat tugas di sekitarnya (jalan-jalan anjing, pindah rumah, bantu pekerjaan rumah, dll), lalu menekan "Ambil" untuk mengerjakan dan mendapat imbalan dalam Rupiah. Pengguna hanya berperan sebagai agen yang mencari dan mengambil tugas; aplikasi tidak menyediakan fitur membuat atau memasang tugas. Tugas UTS Mobile Programming, UI mengikuti design/ui_reference.png.
 
 ## Ketentuan Wajib dari Soal UTS
 - Stack: Flutter dengan paket `google_fonts` dan font **Montserrat**.
 - Aksen warna utama: **#FFCC00**.
 - Model data: `category.dart` dan `task.dart` di dalam `lib/models/`.
 - Service repository: abstract class `TaskRepository` beserta implementasi `LocalJsonRepository` di `lib/services/task_repository.dart`.
-- Halaman wajib di `lib/pages/`: `main_shell.dart`, `home_page.dart`, `category_page.dart`, `detail_page.dart`, `map_page.dart`, `favorites_page.dart`, `chat_page.dart`, `profile_page.dart`.
+- Halaman wajib di `lib/pages/`: `main_shell.dart`, `home_page.dart`, `category_page.dart`, `detail_page.dart`, `map_page.dart`, `favorites_page.dart`, `chat_page.dart`, `profile_page.dart`, `my_tasks_page.dart`.
 - Minimal 3 halaman terhubung navigasi (Navigator.push + BottomNavigationBar).
 - Data dummy dari JSON lokal, struktur siap diganti API.
 - Widget layout beragam (Row, Column, Stack, ListView, Card, dll).
@@ -55,6 +55,7 @@ lib/
     favorites_page.dart
     chat_page.dart
     profile_page.dart
+    my_tasks_page.dart
   widgets/
   theme/
   routes/
