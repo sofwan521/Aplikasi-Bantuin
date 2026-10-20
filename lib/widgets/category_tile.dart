@@ -60,6 +60,8 @@ class CategoryTile extends StatelessWidget {
 
     return Material(
       color: AppColors.surface,
+      elevation: 2,
+      shadowColor: Colors.black12,
       borderRadius: BorderRadius.circular(AppRadius.button),
       child: InkWell(
         onTap: onTap,

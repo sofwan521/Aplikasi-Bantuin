@@ -3,11 +3,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../models/task.dart';
+import '../routes/app_routes.dart';
 import '../services/task_repository.dart';
 import '../theme/app_theme.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/verified_avatar_chip.dart';
-import 'detail_page.dart';
 
 /// Halaman peta statis berisi sebaran tugas dan kartu info tugas terpilih.
 class MapPage extends StatefulWidget {
@@ -121,12 +121,8 @@ class _MapPageState extends State<MapPage> {
                   child: _TaskInfoCard(
                     task: selectedTask,
                     onTap: () {
-                      Navigator.of(context).push<void>(
-                        MaterialPageRoute<void>(
-                          builder: (BuildContext context) =>
-                              DetailPage(task: selectedTask),
-                        ),
-                      );
+                      Navigator.of(context)
+                          .pushNamed(AppRoutes.detail, arguments: selectedTask);
                     },
                   ),
                 ),
@@ -516,8 +512,9 @@ class _TaskInfoCard extends StatelessWidget {
 
     return Card(
       margin: EdgeInsets.zero,
-      elevation: 4,
-      shadowColor: Colors.black26,
+      elevation: 2,
+      shadowColor: Colors.black12,
+      surfaceTintColor: Colors.transparent,
       color: AppColors.surface,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(

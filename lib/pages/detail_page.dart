@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../models/task.dart';
+import '../services/app_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_image.dart';
 import '../widgets/primary_button.dart';
@@ -9,35 +10,24 @@ import '../widgets/verified_avatar_chip.dart';
 
 /// Halaman detail tugas dengan foto header dan aksi mengambil tugas.
 class DetailPage extends StatefulWidget {
-  const DetailPage({super.key, required this.task, this.isFavorite = false});
+  const DetailPage({super.key, required this.task});
 
   /// Tugas yang detailnya sedang ditampilkan.
   final Task task;
-
-  /// Status favorit awal saat halaman dibuka.
-  final bool isFavorite;
 
   @override
   State<DetailPage> createState() => _DetailPageState();
 }
 
 class _DetailPageState extends State<DetailPage> {
-  late bool _isFavorite;
   late bool _isTaken;
   late bool _isCompleted;
 
   @override
   void initState() {
     super.initState();
-    _isFavorite = widget.isFavorite;
     _isTaken = widget.task.status == TaskStatus.taken;
     _isCompleted = widget.task.status == TaskStatus.completed;
-  }
-
-  void _toggleFavorite() {
-    setState(() {
-      _isFavorite = !_isFavorite;
-    });
   }
 
   void _showMessage(String message) {
@@ -83,6 +73,7 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final AppState appState = AppStateScope.of(context);
     final double photoHeight = (MediaQuery.sizeOf(context).height * 0.38)
         .clamp(260.0, 360.0)
         .toDouble();
@@ -109,8 +100,9 @@ class _DetailPageState extends State<DetailPage> {
                       padding: const EdgeInsets.all(AppSpacing.screen),
                       child: _DetailContent(
                         task: widget.task,
-                        isFavorite: _isFavorite,
-                        onFavoriteTap: _toggleFavorite,
+                        isFavorite: appState.isFavorite(widget.task.id),
+                        onFavoriteTap: () =>
+                            appState.toggleFavorite(widget.task.id),
                       ),
                     ),
                   ],
@@ -182,7 +174,8 @@ class _PhotoHeader extends StatelessWidget {
             bottom: AppSpacing.md,
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxWidth: MediaQuery.sizeOf(context).width * 0.55,
+                // Sisakan ruang untuk label tenggat di sisi kanan foto.
+                maxWidth: MediaQuery.sizeOf(context).width * 0.5,
               ),
               child: VerifiedAvatarChip(
                 name: task.posterName,

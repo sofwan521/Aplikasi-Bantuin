@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../models/category.dart';
 import '../models/task.dart';
+import '../routes/app_routes.dart';
+import '../services/app_state.dart';
 import '../services/task_repository.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_search_bar.dart';
@@ -9,9 +11,6 @@ import '../widgets/category_tile.dart';
 import '../widgets/filter_button.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/task_card.dart';
-import 'category_page.dart';
-import 'detail_page.dart';
-import 'map_page.dart';
 
 /// Halaman beranda aplikasi Bantuin.
 ///
@@ -30,7 +29,6 @@ class _HomePageState extends State<HomePage> {
   late final TaskRepository _repository;
   late Future<_HomeData> _dataFuture;
   final TextEditingController _searchController = TextEditingController();
-  final Set<String> _favoriteTaskIds = <String>{};
   String _query = '';
 
   @override
@@ -79,14 +77,6 @@ class _HomePageState extends State<HomePage> {
               task.posterName.toLowerCase().contains(query);
         })
         .toList(growable: false);
-  }
-
-  void _toggleFavorite(String taskId) {
-    setState(() {
-      if (!_favoriteTaskIds.add(taskId)) {
-        _favoriteTaskIds.remove(taskId);
-      }
-    });
   }
 
   void _showComingSoon(String message) {
@@ -147,12 +137,26 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildContent(BuildContext context, _HomeData data) {
-    final List<Task> tasks = _filterTasks(data.tasks)
+    final AppState appState = AppStateScope.of(context);
+    final List<Task> allTasks = <Task>[...appState.localTasks, ...data.tasks];
+    final Map<String, int> taskCounts = Map<String, int>.of(data.taskCounts);
+    for (final Task task in appState.localTasks) {
+      taskCounts.update(
+        task.categoryId,
+        (int value) => value + 1,
+        ifAbsent: () => 1,
+      );
+    }
+    final List<Task> tasks = _filterTasks(allTasks)
         .take(4)
         .toList(growable: false);
-    final double screenWidth = MediaQuery.sizeOf(context).width;
-    final double cardWidth = (screenWidth * 0.78)
+    final Size screenSize = MediaQuery.sizeOf(context);
+    final double cardWidth = (screenSize.width * 0.78)
         .clamp(240.0, 320.0)
+        .toDouble();
+    // Tinggi kartu menyesuaikan layar agar tetap proporsional di ponsel kecil.
+    final double cardHeight = (screenSize.height * 0.33)
+        .clamp(220.0, 280.0)
         .toDouble();
     final TextTheme textTheme = Theme.of(context).textTheme;
 
@@ -161,19 +165,14 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.md),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
             child: _SectionHeader(
               title: 'Direkomendasikan Untukmu',
               actionLabel: 'Lihat di peta',
               onAction: () {
-                Navigator.of(context).push<void>(
-                  MaterialPageRoute<void>(
-                    builder: (BuildContext context) =>
-                        MapPage(repository: _repository),
-                  ),
-                );
+                Navigator.of(context).pushNamed(AppRoutes.map);
               },
             ),
           ),
@@ -189,7 +188,7 @@ class _HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(AppRadius.card),
-                  border: Border.all(color: AppColors.divider),
+                  boxShadow: AppShadows.card,
                 ),
                 child: Column(
                   children: [
@@ -211,7 +210,7 @@ class _HomePageState extends State<HomePage> {
             )
           else
             SizedBox(
-              height: 260,
+              height: cardHeight,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(
@@ -226,18 +225,12 @@ class _HomePageState extends State<HomePage> {
                     width: cardWidth,
                     child: TaskCard.fromTask(
                       task,
-                      isFavorite: _favoriteTaskIds.contains(task.id),
+                      isFavorite: appState.isFavorite(task.id),
                       onTap: () {
-                        Navigator.of(context).push<void>(
-                          MaterialPageRoute<void>(
-                            builder: (BuildContext context) => DetailPage(
-                              task: task,
-                              isFavorite: _favoriteTaskIds.contains(task.id),
-                            ),
-                          ),
-                        );
+                        Navigator.of(context)
+                            .pushNamed(AppRoutes.detail, arguments: task);
                       },
-                      onFavoriteTap: () => _toggleFavorite(task.id),
+                      onFavoriteTap: () => appState.toggleFavorite(task.id),
                       onChatTap: () =>
                           _showComingSoon('Chat pemosting segera hadir.'),
                     ),
@@ -245,7 +238,7 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
             ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.md),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
             child: _SectionHeader(
@@ -257,27 +250,38 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: AppSpacing.sm),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screen),
-            child: Column(
-              children: [
-                for (final Category category in data.categories) ...[
-                  CategoryTile.fromCategory(
-                    category,
-                    taskCount: data.taskCounts[category.id] ?? 0,
-                    onTap: () {
-                      Navigator.of(context).push<void>(
-                        MaterialPageRoute<void>(
-                          builder: (BuildContext context) => CategoryPage(
-                            category: category,
-                            repository: _repository,
-                          ),
+            child: data.categories.isEmpty
+                ? Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(AppRadius.card),
+                      boxShadow: AppShadows.card,
+                    ),
+                    child: Text(
+                      'Belum ada kategori.',
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodySmall,
+                    ),
+                  )
+                : Column(
+                    children: [
+                      for (final Category category in data.categories) ...[
+                        CategoryTile.fromCategory(
+                          category,
+                          taskCount: taskCounts[category.id] ?? 0,
+                          onTap: () {
+                            Navigator.of(context).pushNamed(
+                              AppRoutes.category,
+                              arguments: category,
+                            );
+                          },
                         ),
-                      );
-                    },
+                        const SizedBox(height: AppSpacing.xs),
+                      ],
+                    ],
                   ),
-                  const SizedBox(height: AppSpacing.xs),
-                ],
-              ],
-            ),
           ),
           const SizedBox(height: AppSpacing.md),
         ],
@@ -307,7 +311,7 @@ class _SectionHeader extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: textTheme.titleMedium,
           ),

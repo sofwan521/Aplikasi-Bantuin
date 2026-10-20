@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../models/category.dart';
 import '../models/task.dart';
+import '../routes/app_routes.dart';
+import '../services/app_state.dart';
 import '../services/task_repository.dart';
 import '../theme/app_theme.dart';
-import '../widgets/app_image.dart';
 import '../widgets/primary_button.dart';
-import 'detail_page.dart';
+import '../widgets/task_list_card.dart';
 
 /// Halaman daftar tugas berdasarkan kategori yang dipilih.
 class CategoryPage extends StatefulWidget {
@@ -45,6 +46,11 @@ class _CategoryPageState extends State<CategoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final AppState appState = AppStateScope.of(context);
+    final List<Task> localTasks = appState.localTasks
+        .where((Task task) => task.categoryId == widget.category.id)
+        .toList(growable: false);
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -52,7 +58,11 @@ class _CategoryPageState extends State<CategoryPage> {
           tooltip: 'Kembali',
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: Text(widget.category.name),
+        title: Text(
+          widget.category.name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
       body: FutureBuilder<List<Task>>(
         future: _tasksFuture,
@@ -77,7 +87,10 @@ class _CategoryPageState extends State<CategoryPage> {
             return _ErrorState(onRetry: _reload);
           }
 
-          final List<Task> tasks = snapshot.data ?? const <Task>[];
+          final List<Task> tasks = <Task>[
+            ...localTasks,
+            ...(snapshot.data ?? const <Task>[]),
+          ];
           if (tasks.isEmpty) {
             return const _EmptyState();
           }
@@ -88,113 +101,18 @@ class _CategoryPageState extends State<CategoryPage> {
             separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
             itemBuilder: (BuildContext context, int index) {
               final Task task = tasks[index];
-              return _CategoryTaskCard(
+              return TaskListCard(
                 task: task,
+                isFavorite: appState.isFavorite(task.id),
                 onTap: () {
-                  Navigator.of(context).push<void>(
-                    MaterialPageRoute<void>(
-                      builder: (BuildContext context) => DetailPage(task: task),
-                    ),
-                  );
+                  Navigator.of(context)
+                      .pushNamed(AppRoutes.detail, arguments: task);
                 },
+                onFavoriteTap: () => appState.toggleFavorite(task.id),
               );
             },
           );
         },
-      ),
-    );
-  }
-}
-
-/// Kartu tugas pada daftar kategori.
-class _CategoryTaskCard extends StatelessWidget {
-  const _CategoryTaskCard({required this.task, required this.onTap});
-
-  final Task task;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final TextTheme textTheme = Theme.of(context).textTheme;
-
-    return Card(
-      margin: EdgeInsets.zero,
-      elevation: 0,
-      color: AppColors.surface,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        side: const BorderSide(color: AppColors.divider),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.sm),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(AppRadius.photo),
-                child: SizedBox(
-                  width: 88,
-                  height: 88,
-                  child: AppImage(path: task.photoUrl, fit: BoxFit.cover),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      task.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.place_outlined,
-                          size: 14,
-                          color: AppColors.textSecondary,
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            task.location,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: textTheme.bodySmall,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            _formatRupiah(task.rate),
-                            style: textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          'Sampai ${_formatDueDate(task.deadline)}',
-                          style: textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -285,28 +203,4 @@ class _ErrorState extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Mengubah nominal menjadi format Rupiah, misalnya "Rp 100.000".
-String _formatRupiah(int amount) {
-  final String value = amount.toString();
-  final StringBuffer buffer = StringBuffer();
-
-  for (int index = 0; index < value.length; index++) {
-    buffer.write(value[index]);
-    final int remaining = value.length - index - 1;
-    if (remaining > 0 && remaining % 3 == 0) {
-      buffer.write('.');
-    }
-  }
-
-  return 'Rp $buffer';
-}
-
-/// Mengubah tanggal tenggat menjadi format dd.MM.
-String _formatDueDate(DateTime deadline) {
-  final DateTime localDate = deadline.toLocal();
-  final String day = localDate.day.toString().padLeft(2, '0');
-  final String month = localDate.month.toString().padLeft(2, '0');
-  return '$day.$month';
 }

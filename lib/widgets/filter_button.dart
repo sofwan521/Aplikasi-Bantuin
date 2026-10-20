@@ -30,11 +30,7 @@ class FilterButton extends StatelessWidget {
           child: SizedBox(
             width: size,
             height: size,
-            child: Icon(
-              icon,
-              color: AppColors.textPrimary,
-              size: 24,
-            ),
+            child: Icon(icon, color: AppColors.textPrimary, size: 24),
           ),
         ),
       ),
